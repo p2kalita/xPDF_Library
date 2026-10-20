@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Library</title>
+<style>
+  :root {
+    --bg: #f4f1ea; --fg: #2b2620; --muted: #7a7064; --card: #fffdf8;
+    --chip: #e7e1d5; --chip-on: #2b2620; --chip-on-fg: #f4f1ea; --shadow: rgba(60,40,20,.25);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1916; --fg: #ece6da; --muted: #9a9284; --card: #26241f;
+      --chip: #33302a; --chip-on: #ece6da; --chip-on-fg: #1a1916; --shadow: rgba(0,0,0,.6);
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+         font: 15px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { position: sticky; top: 0; z-index: 1; background: var(--bg);
+           padding: 20px 24px 12px; border-bottom: 1px solid var(--chip); }
+  h1 { margin: 0 0 12px; font: 600 26px/1.2 Georgia, serif; }
+  h1 small { font: 14px system-ui, sans-serif; color: var(--muted); margin-left: 8px; }
+  #search { width: 100%; max-width: 420px; padding: 9px 14px; font: inherit;
+            border: 1px solid var(--chip); border-radius: 8px; background: var(--card); color: var(--fg); }
+  #chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .chip { border: 0; padding: 5px 12px; border-radius: 99px; background: var(--chip);
+          color: var(--fg); font: inherit; font-size: 13px; cursor: pointer; }
+  .chip.on { background: var(--chip-on); color: var(--chip-on-fg); }
+  main { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+         gap: 32px 24px; padding: 28px 24px 60px; }
+  .book { text-decoration: none; color: inherit; display: flex; flex-direction: column; }
+  .cover { aspect-ratio: 2 / 3; border-radius: 2px 6px 6px 2px; overflow: hidden;
+           background: var(--card); box-shadow: 4px 6px 14px var(--shadow), inset 4px 0 6px rgba(0,0,0,.15);
+           transition: transform .18s, box-shadow .18s; position: relative; }
+  .cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cover .ph { padding: 16px; height: 100%; display: flex; align-items: center; text-align: center;
+               font: 600 15px/1.3 Georgia, serif; }
+  .book:hover .cover, .book:focus-visible .cover { transform: translateY(-6px) rotate(-1deg);
+           box-shadow: 8px 14px 24px var(--shadow); }
+  .title { margin-top: 10px; font-weight: 600; font-size: 14px; display: -webkit-box;
+           -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .meta { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  #empty { grid-column: 1 / -1; text-align: center; color: var(--muted); padding: 40px; }
+  @media (max-width: 520px) {
+    header { padding: 16px 16px 10px; }
+    main { padding: 20px 16px 40px; grid-template-columns: repeat(2, 1fr); gap: 24px 16px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>My Library <small id="count"></small></h1>
+  <input id="search" type="search" placeholder="Search books…" autofocus>
+  <div id="chips"></div>
+</header>
+<main id="shelf"></main>
+<script>
+const BOOKS = [{"title": "Agentic Devops Claude Code Governed Ai Platforms", "category": "Agentic-devops", "href": "Agentic-devops/agentic-devops-claude-code-governed-ai-platforms.pdf", "cover": ".library/covers/e10124088695e14b.jpg", "pages": 322, "sizeMB": 14.1}, {"title": "AI Agents in Action, Second Edition", "category": "Ai Agents", "href": "Ai%20Agents/ai-agents-action-intelligent-workflows-2nd.pdf", "cover": ".library/covers/80284f6bca1893b5.jpg", "pages": 392, "sizeMB": 38.2}, {"title": "AI Agents", "category": "Ai Agents", "href": "Ai%20Agents/ai-agents-definitive-deployment-production.pdf", "cover": ".library/covers/f9f2ee7eea891ec4.jpg", "pages": 496, "sizeMB": 14.1}, {"title": "AI Agents with MCP", "category": "Ai Agents", "href": "Ai%20Agents/ai-agents-mcp-model-context-protocol-building.pdf", "cover": ".library/covers/e330fe5bf3d12a93.jpg", "pages": 425, "sizeMB": 17.2}, {"title": "Becoming An AI Orchestrator: A Business Professional's Guide to Leading, Creating, and Thriving in the Age of Intelligence", "category": "Ai Agents", "href": "Ai%20Agents/becoming-ai-orchestrator-lawrence.pdf", "cover": ".library/covers/bf108ee0a2b7b781.jpg", "pages": 235, "sizeMB": 4.2}, {"title": "Building LLM Applications with DSPy", "category": "Ai Agents", "href": "Ai%20Agents/building-llm-applications-dspy-optimization.pdf", "cover": ".library/covers/fe866fd7c19175dc.jpg", "pages": 296, "sizeMB": 5.4}, {"title": "The AI Cost Playbook", "category": "ai Cost", "href": "ai%20Cost/ai-cost-playbook-economics-governance.pdf", "cover": ".library/covers/b665b10bd02801d7.jpg", "pages": 206, "sizeMB": 1.8}, {"title": "Intelligent Automated Defect Detection: AI Solutions for Roads, Welding, and Industrial Inspection", "category": "computer_vision", "href": "computer_vision/intelligent-automated-defect-detection-ai-solutions.pdf", "cover": ".library/covers/b3739bd1fdf90cb7.jpg", "pages": 262, "sizeMB": 68.3}, {"title": "The DevOps Handbook", "category": "devops-HANDBOOK", "href": "devops-HANDBOOK/devops-handbook-2nd.pdf", "cover": ".library/covers/161880cedb88ad69.jpg", "pages": 712, "sizeMB": 19.0}, {"title": "AI Evals in Practice", "category": "evalKIT", "href": "evalKIT/ai-evals-practice-llm-systems-production.pdf", "cover": ".library/covers/a0a72d4aeef68d5f.jpg", "pages": 216, "sizeMB": 1.5}, {"title": "Digital Image Processing", "category": "Imgae-processing", "href": "Imgae-processing/digital-image-processing-theory-practice-ai-applications.pdf", "cover": ".library/covers/fa77176ef6409fd9.jpg", "pages": 513, "sizeMB": 23.8}, {"title": "Generative AI on Kubernetes", "category": "k8s", "href": "k8s/generative-ai-kubernetes-operationalizing-llm.pdf", "cover": ".library/covers/c4fdb15c27104321.jpg", "pages": 407, "sizeMB": 8.0}, {"title": "Machine Learning Malware Detection", "category": "Machine Learning", "href": "Machine%20Learning/machine-learning-malware-detection.pdf", "cover": ".library/covers/db8af16a35a6c203.jpg", "pages": 265, "sizeMB": 32.9}, {"title": "Agent Orchestrated Engineering Simulation Fast", "category": "misc", "href": "misc/agent-orchestrated-engineering-simulation-fast.pdf", "cover": ".library/covers/297abcc7851f8bd9.jpg", "pages": 96, "sizeMB": 11.9}, {"title": "Chatgpt Visual Bible Analyzing Automating", "category": "misc", "href": "misc/chatgpt-visual-bible-analyzing-automating.pdf", "cover": ".library/covers/91c803b085000231.jpg", "pages": 201, "sizeMB": 18.5}, {"title": "An Illustrated Guide to AI Agents (for . .)", "category": "misc", "href": "misc/illustrated-guide-ai-agents-concepts.pdf", "cover": ".library/covers/a6a8a394bce363bf.jpg", "pages": 584, "sizeMB": 51.3}, {"title": "Multi Agent Ai Engineering Coordinated Teams", "category": "multi-agent", "href": "multi-agent/multi-agent-ai-engineering-coordinated-teams.pdf", "cover": ".library/covers/3067089c3b90bc13.jpg", "pages": 826, "sizeMB": 28.3}, {"title": "Systems Thinking Agentic Ai Software Architects", "category": "Uncategorized", "href": "systems-thinking-agentic-ai-software-architects.pdf", "cover": ".library/covers/d60f106062b2be3e.jpg", "pages": 366, "sizeMB": 80.5}];
+let cat = "All", q = "";
+const shelf = document.getElementById("shelf");
+const esc = s => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+const cats = ["All", ...[...new Set(BOOKS.map(b => b.category))].sort((a, b) => a.localeCompare(b))];
+document.getElementById("chips").innerHTML = cats.map(c =>
+  `<button class="chip${c === cat ? " on" : ""}" data-cat="${esc(c)}">${esc(c)}</button>`).join("");
+document.getElementById("chips").onclick = e => {
+  const b = e.target.closest(".chip"); if (!b) return;
+  cat = b.dataset.cat;
+  document.querySelectorAll(".chip").forEach(x => x.classList.toggle("on", x === b));
+  render();
+};
+document.getElementById("search").oninput = e => { q = e.target.value.trim().toLowerCase(); render(); };
+
+function render() {
+  const list = BOOKS.filter(b => (cat === "All" || b.category === cat) &&
+    (!q || (b.title + " " + b.category).toLowerCase().includes(q)));
+  document.getElementById("count").textContent = `${list.length} of ${BOOKS.length} books`;
+  shelf.innerHTML = list.length ? list.map(b => `
+    <a class="book" href="${b.href}" target="_blank" title="${esc(b.title)}">
+      <div class="cover">${b.cover
+        ? `<img src="${encodeURI(b.cover)}" alt="" loading="lazy">`
+        : `<div class="ph">${esc(b.title)}</div>`}</div>
+      <div class="title">${esc(b.title)}</div>
+      <div class="meta">${esc(b.category)}${b.pages ? ` · ${b.pages} pages` : ""} · ${b.sizeMB} MB</div>
+    </a>`).join("") : `<div id="empty">No books match.</div>`;
+}
+render();
+</script>
+</body>
+</html>
